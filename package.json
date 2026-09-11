@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RICHVISUAL — визуал для твоего мира</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800;900&family=Manrope:wght@400;500;600;700&display=swap');
+
+  :root{
+    --bg-deep: #13171A;
+    --bg-panel: #1C2125;
+    --bg-panel-2: #232A2E;
+    --slot: #262D31;
+    --slot-border: #383F43;
+    --emerald: #35B378;
+    --emerald-dim: #247B53;
+    --gold: #D9A441;
+    --redstone: #C1483B;
+    --text-primary: #F1EEE3;
+    --text-secondary: #9AA6A0;
+    --text-faint: #5D6569;
+    --radius: 2px;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+
+  html{scroll-behavior:smooth;}
+
+  body{
+    background:var(--bg-deep);
+    color:var(--text-primary);
+    font-family:'Manrope', sans-serif;
+    font-size:16px;
+    line-height:1.6;
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(53,179,120,0.06), transparent 40%),
+      radial-gradient(circle at 85% 30%, rgba(217,164,65,0.05), transparent 35%);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
+  }
+
+  .wrap{max-width:1120px; margin:0 auto; padding:0 28px;}
+
+  h1,h2,h3{font-family:'Unbounded', sans-serif; letter-spacing:-0.01em;}
+
+  a{color:inherit; text-decoration:none;}
+
+  button{font-family:inherit; cursor:pointer;}
+
+  /* ---------- Header ---------- */
+  header{
+    position:sticky; top:0; z-index:50;
+    background:rgba(19,23,26,0.88);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--slot-border);
+  }
+  .nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 0;
+  }
+  .logo{
+    display:flex; align-items:center; gap:10px;
+    font-family:'Unbounded', sans-serif; font-weight:800; font-size:1.05rem;
+  }
+  .logo-mark{
+    width:22px; height:22px; background:var(--emerald);
+    position:relative;
+    box-shadow: 3px 3px 0 var(--emerald-dim);
+  }
+  .nav-links{display:flex; gap:32px;}
+  .nav-links a{
+    color:var(--text-secondary); font-size:0.92rem; font-weight:600;
+    transition:color 0.15s ease;
+  }
+  .nav-links a:hover{color:var(--text-primary);}
+  .nav-cta{
+    background:var(--emerald); color:#0D1512;
+    padding:10px 20px; font-weight:700; font-size:0.88rem;
+    border:none; border-radius:var(--radius);
+    box-shadow:3px 3px 0 var(--emerald-dim);
+    transition:transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .nav-cta:hover{transform:translate(-1px,-1px); box-shadow:4px 4px 0 var(--emerald-dim);}
+
+  @media (max-width:720px){ .nav-links{display:none;} }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    padding:96px 0 80px;
+    display:grid; grid-template-columns:1.15fr 1fr; gap:56px; align-items:center;
+  }
+  .hero-eyebrow{
+    color:var(--emerald); font-weight:700; font-size:0.85rem;
+    margin-bottom:18px; display:flex; align-items:center; gap:10px;
+  }
+  .hero-eyebrow .dot{width:7px; height:7px; background:var(--emerald); display:inline-block;}
+  .hero h1{
+    font-size:clamp(2.2rem, 4.4vw, 3.4rem);
+    line-height:1.08; font-weight:900;
+    margin-bottom:22px;
+  }
+  .hero p.lead{
+    color:var(--text-secondary); font-size:1.08rem; max-width:46ch; margin-bottom:32px;
+  }
+  .hero-actions{display:flex; gap:14px; flex-wrap:wrap;}
+  .btn-primary{
+    background:var(--emerald); color:#0D1512; font-weight:700; padding:14px 26px;
+    border:none; border-radius:var(--radius); font-size:0.95rem;
+    box-shadow:4px 4px 0 var(--emerald-dim);
+    transition:transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .btn-primary:hover{transform:translate(-2px,-2px); box-shadow:6px 6px 0 var(--emerald-dim);}
+  .btn-ghost{
+    background:transparent; color:var(--text-primary); font-weight:700; padding:14px 26px;
+    border:1px solid var(--slot-border); border-radius:var(--radius); font-size:0.95rem;
+    transition:border-color 0.15s ease, background 0.15s ease;
+  }
+  .btn-ghost:hover{border-color:var(--gold); background:rgba(217,164,65,0.06);}
+
+  /* hero mosaic — like an inventory grid assembling */
+  .mosaic{
+    display:grid; grid-template-columns:repeat(3, 1fr); grid-template-rows:repeat(3, 1fr);
+    gap:8px; aspect-ratio:1/1;
+  }
+  .slot{
+    background:var(--slot); border:1px solid var(--slot-border);
+    display:flex; align-items:center; justify-content:center;
+    position:relative; overflow:hidden;
+    opacity:0; transform:scale(0.85);
+    animation:pop 0.4s ease forwards;
+  }
+  .slot svg{width:38%; height:38%; opacity:0.85;}
+  .slot.big{grid-column:span 2; grid-row:span 2;}
+  .slot:nth-child(1){animation-delay:0.05s;}
+  .slot:nth-child(2){animation-delay:0.12s;}
+  .slot:nth-child(3){animation-delay:0.19s;}
+  .slot:nth-child(4){animation-delay:0.26s;}
+  .slot:nth-child(5){animation-delay:0.33s;}
+  @keyframes pop{ to{opacity:1; transform:scale(1);} }
+
+  @media (max-width:900px){
+    .hero{grid-template-columns:1fr; padding:56px 0 48px;}
+    .mosaic{max-width:340px; margin:0 auto;}
+  }
+
+  /* ---------- Section shell ---------- */
+  section{padding:76px 0;}
+  .section-head{margin-bottom:44px; max-width:60ch;}
+  .section-head .kicker{color:var(--gold); font-weight:700; font-size:0.85rem; margin-bottom:10px;}
+  .section-head h2{font-size:clamp(1.6rem, 3vw, 2.2rem); font-weight:800; margin-bottom:12px;}
+  .section-head p{color:var(--text-secondary); font-size:1rem;}
+
+  hr.divider{border:none; border-top:1px solid var(--slot-border); margin:0;}
+
+  /* ---------- Services ---------- */
+  .services-grid{
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(230px,1fr)); gap:2px;
+    background:var(--slot-border); border:1px solid var(--slot-border);
+  }
+  .service-card{
+    background:var(--bg-panel); padding:30px 26px; position:relative;
+    transition:background 0.15s ease;
+  }
+  .service-card:hover{background:var(--bg-panel-2);}
+  .service-card .icon{width:34px; height:34px; margin-bottom:18px;}
+  .service-card h3{font-size:1.05rem; font-weight:700; margin-bottom:10px;}
+  .service-card p{color:var(--text-secondary); font-size:0.92rem;}
+
+  /* ---------- Portfolio ---------- */
+  .gallery{
+    display:grid; grid-template-columns:repeat(4, 1fr); grid-auto-rows:130px; gap:6px;
+  }
+  .g-item{
+    background:linear-gradient(135deg, var(--slot), var(--bg-panel-2));
+    border:1px solid var(--slot-border); display:flex; flex-direction:column;
+    align-items:flex-start; justify-content:flex-end; padding:12px;
+    font-size:0.78rem; color:var(--text-faint); font-weight:600;
+    transition:border-color 0.15s ease;
+  }
+  .g-item:hover{border-color:var(--emerald);}
+  .g-item span.tag{color:var(--text-secondary);}
+  .g-item.tall{grid-row:span 2;}
+  .g-item.wide{grid-column:span 2;}
+
+  @media (max-width:700px){
+    .gallery{grid-template-columns:repeat(2,1fr);}
+    .g-item.wide{grid-column:span 2;}
+  }
+
+  /* ---------- Pricing ---------- */
+  .pricing-grid{
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:2px;
+    background:var(--slot-border); border:1px solid var(--slot-border);
+  }
+  .price-card{
+    background:var(--bg-panel); padding:32px 28px; display:flex; flex-direction:column;
+  }
+  .price-card.featured{background:var(--bg-panel-2); border-top:2px solid var(--emerald);}
+  .price-card .tier{font-weight:700; font-size:0.85rem; color:var(--gold); margin-bottom:8px;}
+  .price-card h3{font-size:1.3rem; font-weight:800; margin-bottom:4px;}
+  .price-card .amount{font-family:'Unbounded'; font-size:1.9rem; font-weight:900; margin:14px 0 6px;}
+  .price-card .amount span{font-size:0.95rem; color:var(--text-secondary); font-weight:500; font-family:'Manrope';}
+  .price-card ul{list-style:none; margin:22px 0 26px; flex:1;}
+  .price-card li{
+    color:var(--text-secondary); font-size:0.88rem; padding:7px 0 7px 20px; position:relative;
+  }
+  .price-card li::before{
+    content:''; position:absolute; left:0; top:14px; width:6px; height:6px; background:var(--emerald);
+  }
+  .price-card button{
+    background:transparent; border:1px solid var(--slot-border); color:var(--text-primary);
+    padding:12px; font-weight:700; font-size:0.88rem; border-radius:var(--radius);
+    transition:all 0.15s ease;
+  }
+  .price-card.featured button{background:var(--emerald); color:#0D1512; border-color:var(--emerald);}
+  .price-card button:hover{border-color:var(--gold);}
+  .price-card.featured button:hover{filter:brightness(1.08);}
+
+  @media (max-width:800px){ .pricing-grid{grid-template-columns:1fr;} }
+
+  /* ---------- Process ---------- */
+  .process{display:grid; grid-template-columns:repeat(4,1fr); gap:2px; background:var(--slot-border); border:1px solid var(--slot-border);}
+  .step{background:var(--bg-panel); padding:26px 22px;}
+  .step .num{font-family:'Unbounded'; color:var(--emerald); font-weight:800; font-size:1.1rem; margin-bottom:14px;}
+  .step h4{font-size:0.98rem; font-weight:700; margin-bottom:8px;}
+  .step p{color:var(--text-secondary); font-size:0.85rem;}
+  @media (max-width:800px){ .process{grid-template-columns:1fr 1fr;} }
+  @media (max-width:500px){ .process{grid-template-columns:1fr;} }
+
+  /* ---------- Order form ---------- */
+  .order-panel{
+    background:var(--bg-panel); border:1px solid var(--slot-border); padding:44px;
+    display:grid; grid-template-columns:1fr 1fr; gap:28px;
+  }
+  @media (max-width:800px){ .order-panel{grid-template-columns:1fr; padding:28px;} }
+
+  .field{display:flex; flex-direction:column; gap:8px;}
+  .field label{font-size:0.82rem; font-weight:700; color:var(--text-secondary);}
+  .field input, .field select, .field textarea{
+    background:var(--slot); border:1px solid var(--slot-border); color:var(--text-primary);
+    padding:12px 14px; font-family:inherit; font-size:0.92rem; border-radius:var(--radius);
+    transition:border-color 0.15s ease;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{
+    outline:none; border-color:var(--emerald);
+  }
+  .field textarea{resize:vertical; min-height:96px;}
+  .field.full{grid-column:1/-1;}
+
+  .order-submit{
+    grid-column:1/-1; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;
+    padding-top:6px;
+  }
+  .order-note{color:var(--text-faint); font-size:0.82rem; max-width:36ch;}
+
+  #order-status{
+    grid-column:1/-1; display:none; padding:16px 18px; background:rgba(53,179,120,0.1);
+    border:1px solid var(--emerald-dim); color:var(--emerald); font-size:0.9rem; font-weight:600;
+  }
+
+  /* ---------- Footer ---------- */
+  footer{border-top:1px solid var(--slot-border); padding:36px 0; margin-top:40px;}
+  .foot-row{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;}
+  .foot-row p{color:var(--text-faint); font-size:0.85rem;}
+  .foot-links{display:flex; gap:22px;}
+  .foot-links a{color:var(--text-secondary); font-size:0.85rem; transition:color 0.15s ease;}
+  .foot-links a:hover{color:var(--emerald);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <div class="logo"><span class="logo-mark"></span>RICHVISUAL</div>
+    <nav class="nav-links">
+      <a href="#services">Услуги</a>
+      <a href="#portfolio">Портфолио</a>
+      <a href="#pricing">Цены</a>
+      <a href="#process">Как заказать</a>
+    </nav>
+    <a href="#order" class="nav-cta">Оставить заявку</a>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section class="hero">
+    <div>
+      <div class="hero-eyebrow"><span class="dot"></span>Визуал для Minecraft-каналов и серверов</div>
+      <h1>Обложки, баннеры и лого, которые заставляют кликнуть</h1>
+      <p class="lead">Делаю визуал для ютуберов, стримеров и серверов: превью для видео, шапки каналов, лого сборок и полные комплекты оформления. Быстро, по референсам, с правками.</p>
+      <div class="hero-actions">
+        <a href="#order" class="btn-primary">Оставить заявку</a>
+        <a href="#pricing" class="btn-ghost">Смотреть цены</a>
+      </div>
+    </div>
+    <div class="mosaic">
+      <div class="slot big">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#35B378" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="1"/><circle cx="8.5" cy="10" r="1.5" fill="#35B378" stroke="none"/><path d="M3 16l5-4 4 3 5-5 4 4"/></svg>
+      </div>
+      <div class="slot">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#D9A441" stroke-width="1.6"><rect x="4" y="4" width="16" height="16"/><path d="M4 4l16 16M20 4L4 20"/></svg>
+      </div>
+      <div class="slot">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#9AA6A0" stroke-width="1.6"><rect x="6" y="3" width="12" height="18" rx="1"/><path d="M9 7h6M9 11h6M9 15h3"/></svg>
+      </div>
+      <div class="slot">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#35B378" stroke-width="1.6"><path d="M12 3l3 6 6 1-4.5 4.4L17.5 21 12 17.8 6.5 21l1-6.6L3 10l6-1z"/></svg>
+      </div>
+      <div class="slot">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#C1483B" stroke-width="1.6"><rect x="3" y="8" width="18" height="10"/><rect x="3" y="4" width="18" height="4"/></svg>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section id="services">
+    <div class="section-head">
+      <div class="kicker">Услуги</div>
+      <h2>Всё, что нужно для оформления канала или сервера</h2>
+      <p>Каждый формат делается под конкретную площадку — с учётом того, как превью выглядит в ленте, а баннер на странице канала.</p>
+    </div>
+    <div class="services-grid">
+      <div class="service-card">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#35B378" stroke-width="1.5"><rect x="3" y="5" width="18" height="14" rx="1"/><circle cx="8.5" cy="10" r="1.5"/><path d="M3 16l5-4 4 3 5-5 4 4"/></svg>
+        <h3>Превью для видео</h3>
+        <p>Кликабельная обложка под конкретный ролик: акцент на лицо, предмет или момент, крупный читаемый текст.</p>
+      </div>
+      <div class="service-card">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#D9A441" stroke-width="1.5"><rect x="3" y="8" width="18" height="10"/><rect x="3" y="4" width="18" height="4"/></svg>
+        <h3>Баннер канала</h3>
+        <p>Шапка для YouTube, Telegram или Discord с сохранением безопасных зон под аватар и виджеты.</p>
+      </div>
+      <div class="service-card">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#C1483B" stroke-width="1.5"><path d="M12 3l3 6 6 1-4.5 4.4L17.5 21 12 17.8 6.5 21l1-6.6L3 10l6-1z"/></svg>
+        <h3>Логотип сборки</h3>
+        <p>Знак для модпака, сборки или сервера: иконка, читаемая даже в размере 32×32.</p>
+      </div>
+      <div class="service-card">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#9AA6A0" stroke-width="1.5"><rect x="4" y="4" width="7" height="7"/><rect x="13" y="4" width="7" height="7"/><rect x="4" y="13" width="7" height="7"/><rect x="13" y="13" width="7" height="7"/></svg>
+        <h3>Полный комплект</h3>
+        <p>Превью, баннер, лого и аватар в единой стилистике — чтобы канал считывался как одно целое.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section id="portfolio">
+    <div class="section-head">
+      <div class="kicker">Портфолио</div>
+      <h2>Примеры последних работ</h2>
+      <p>Часть проектов скрыта по договорённости с заказчиками — полную подборку присылаю в личных сообщениях.</p>
+    </div>
+    <div class="gallery">
+      <div class="g-item wide tall"><span class="tag">Превью</span> «Нашёл алмазы на 3 слое»</div>
+      <div class="g-item"><span class="tag">Баннер</span> сервер SkyWars</div>
+      <div class="g-item"><span class="tag">Лого</span> сборка Frostcraft</div>
+      <div class="g-item tall"><span class="tag">Превью</span> «Хардкор день 100»</div>
+      <div class="g-item wide"><span class="tag">Комплект</span> канал MOBOB</div>
+      <div class="g-item"><span class="tag">Баннер</span> Discord «Рудники»</div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section id="pricing">
+    <div class="section-head">
+      <div class="kicker">Цены</div>
+      <h2>Прозрачные тарифы без скрытых доплат</h2>
+      <p>Правки в пределах тарифа включены. Срочность (до 24 часов) — плюс 30% к стоимости.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="tier">Старт</div>
+        <h3>Одно превью</h3>
+        <div class="amount">700 ₽</div>
+        <ul>
+          <li>1 превью в разрешении 1280×720</li>
+          <li>2 круга правок</li>
+          <li>Срок — 2 дня</li>
+        </ul>
+        <button type="button">Выбрать тариф</button>
+      </div>
+      <div class="price-card featured">
+        <div class="tier">Популярный</div>
+        <h3>Оформление канала</h3>
+        <div class="amount">2 400 ₽ <span>/ 5 превью</span></div>
+        <ul>
+          <li>5 превью в едином стиле</li>
+          <li>Баннер канала</li>
+          <li>3 круга правок</li>
+          <li>Срок — 4 дня</li>
+        </ul>
+        <button type="button">Выбрать тариф</button>
+      </div>
+      <div class="price-card">
+        <div class="tier">Полный</div>
+        <h3>Комплект + лого</h3>
+        <div class="amount">4 200 ₽</div>
+        <ul>
+          <li>Превью, баннер, лого, аватар</li>
+          <li>Гайд по использованию цветов и шрифтов</li>
+          <li>Безлимит правок 7 дней</li>
+          <li>Срок — 6 дней</li>
+        </ul>
+        <button type="button">Выбрать тариф</button>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section id="process">
+    <div class="section-head">
+      <div class="kicker">Как заказать</div>
+      <h2>Четыре шага от заявки до готового файла</h2>
+    </div>
+    <div class="process">
+      <div class="step">
+        <div class="num">01</div>
+        <h4>Заявка</h4>
+        <p>Заполняете форму ниже или пишете напрямую с описанием задачи.</p>
+      </div>
+      <div class="step">
+        <div class="num">02</div>
+        <h4>Референсы</h4>
+        <p>Присылаете примеры того, что нравится, и материалы: скриншоты, ник, цвета сервера.</p>
+      </div>
+      <div class="step">
+        <div class="num">03</div>
+        <h4>Черновик</h4>
+        <p>Показываю первый вариант в течение оговорённого срока, собираю правки.</p>
+      </div>
+      <div class="step">
+        <div class="num">04</div>
+        <h4>Готовый файл</h4>
+        <p>Отдаю финальные файлы в нужном разрешении и формате.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section id="order">
+    <div class="section-head">
+      <div class="kicker">Заявка</div>
+      <h2>Расскажите о задаче</h2>
+      <p>Отвечаю на заявки в течение суток. Чем подробнее опишете идею, тем точнее будет первый черновик.</p>
+    </div>
+
+    <form class="order-panel" id="order-form">
+      <div class="field">
+        <label for="name">Имя или никнейм</label>
+        <input type="text" id="name" required placeholder="Например, Steve_YT">
+      </div>
+      <div class="field">
+        <label for="contact">Контакт для связи</label>
+        <input type="text" id="contact" required placeholder="Discord, Telegram или почта">
+      </div>
+      <div class="field">
+        <label for="service">Что нужно</label>
+        <select id="service">
+          <option>Превью для видео</option>
+          <option>Баннер канала</option>
+          <option>Логотип сборки</option>
+          <option>Полный комплект</option>
+          <option>Другое</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="deadline">Срок</label>
+        <select id="deadline">
+          <option>Как обычно (2–6 дней)</option>
+          <option>Срочно (до 24 часов, +30%)</option>
+        </select>
+      </div>
+      <div class="field full">
+        <label for="details">Описание задачи</label>
+        <textarea id="details" placeholder="О чём видео или сервер, какая атмосфера нужна, есть ли референсы"></textarea>
+      </div>
+      <div class="order-submit">
+        <p class="order-note">Отправляя заявку, вы соглашаетесь на использование указанных контактов для связи по проекту.</p>
+        <button type="submit" class="btn-primary">Отправить заявку</button>
+      </div>
+      <div id="order-status">Заявка сохранена. Свяжусь с вами по указанному контакту в течение суток.</div>
+    </form>
+  </section>
+
+</div>
+
+<footer>
+  <div class="wrap foot-row">
+    <p>© 2026 RichVisual. Не связано с Mojang или Microsoft.</p>
+    <div class="foot-links">
+      <a href="#services">Услуги</a>
+      <a href="#portfolio">Портфолио</a>
+      <a href="#order">Заявка</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('order-form').addEventListener('submit', function(e){
+    e.preventDefault();
+    const status = document.getElementById('order-status');
+    status.style.display = 'block';
+    this.querySelector('.btn-primary').setAttribute('disabled', 'true');
+    status.scrollIntoView({behavior:'smooth', block:'nearest'});
+  });
+</script>
+
+</body>
+</html>
