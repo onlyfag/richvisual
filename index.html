@@ -6,27 +6,31 @@
 <title>RICHVISUAL — визуал для твоего мира</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800;900&family=Manrope:wght@400;500;600;700&display=swap');
-
+ 
   :root{
-    --bg-deep: #13171A;
-    --bg-panel: #1C2125;
-    --bg-panel-2: #232A2E;
-    --slot: #262D31;
-    --slot-border: #383F43;
-    --emerald: #35B378;
-    --emerald-dim: #247B53;
-    --gold: #D9A441;
-    --redstone: #C1483B;
-    --text-primary: #F1EEE3;
-    --text-secondary: #9AA6A0;
-    --text-faint: #5D6569;
+    --bg-deep: #0A0A0D;
+    --bg-panel: rgba(18, 16, 24, 0.75);
+    --bg-panel-2: rgba(24, 20, 32, 0.85);
+    --slot: rgba(22, 19, 28, 0.7);
+    --slot-border: #2C2735;
+    --purple: #A855F7;
+    --purple-dim: #6D28D9;
+    --violet-light: #C4B5FD;
+    --pink: #E879F9;
+    --text-primary: #F5F3F9;
+    --text-secondary: #A79FBA;
+    --text-faint: #635C74;
     --radius: 2px;
   }
-
+ 
   *{box-sizing:border-box; margin:0; padding:0;}
-
+ 
   html{scroll-behavior:smooth;}
-
+ 
+  #starfield{
+    position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1;
+  }
+ 
   body{
     background:var(--bg-deep);
     color:var(--text-primary);
@@ -34,22 +38,22 @@
     font-size:16px;
     line-height:1.6;
     background-image:
-      radial-gradient(circle at 20% 10%, rgba(53,179,120,0.06), transparent 40%),
-      radial-gradient(circle at 85% 30%, rgba(217,164,65,0.05), transparent 35%);
+      radial-gradient(circle at 50% 0%, rgba(168,85,247,0.16), transparent 45%),
+      radial-gradient(circle at 85% 30%, rgba(232,121,249,0.06), transparent 35%);
   }
-
+ 
   @media (prefers-reduced-motion: reduce){
     *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
   }
-
+ 
   .wrap{max-width:1120px; margin:0 auto; padding:0 28px;}
-
+ 
   h1,h2,h3{font-family:'Unbounded', sans-serif; letter-spacing:-0.01em;}
-
+ 
   a{color:inherit; text-decoration:none;}
-
+ 
   button{font-family:inherit; cursor:pointer;}
-
+ 
   /* ---------- Header ---------- */
   header{
     position:sticky; top:0; z-index:50;
@@ -66,9 +70,9 @@
     font-family:'Unbounded', sans-serif; font-weight:800; font-size:1.05rem;
   }
   .logo-mark{
-    width:22px; height:22px; background:var(--emerald);
+    width:22px; height:22px; background:var(--purple); border-radius:4px;
     position:relative;
-    box-shadow: 3px 3px 0 var(--emerald-dim);
+    box-shadow: 0 0 14px rgba(168,85,247,0.7);
   }
   .nav-links{display:flex; gap:32px;}
   .nav-links a{
@@ -77,53 +81,117 @@
   }
   .nav-links a:hover{color:var(--text-primary);}
   .nav-cta{
-    background:var(--emerald); color:#0D1512;
+    background:linear-gradient(90deg, var(--purple-dim), var(--purple)); color:#fff;
     padding:10px 20px; font-weight:700; font-size:0.88rem;
     border:none; border-radius:var(--radius);
-    box-shadow:3px 3px 0 var(--emerald-dim);
+    box-shadow:0 0 16px rgba(168,85,247,0.4);
     transition:transform 0.12s ease, box-shadow 0.12s ease;
   }
-  .nav-cta:hover{transform:translate(-1px,-1px); box-shadow:4px 4px 0 var(--emerald-dim);}
-
+  .nav-cta:hover{transform:translateY(-1px); box-shadow:0 0 22px rgba(168,85,247,0.6);}
+ 
+  .nav-right{ display:flex; align-items:center; gap:14px; }
+  .nav-account{
+    background:transparent; border:1px solid var(--slot-border); color:var(--text-primary);
+    padding:9px 18px; font-weight:700; font-size:0.85rem; border-radius:var(--radius);
+    transition:border-color 0.15s ease, background 0.15s ease;
+  }
+  .nav-account:hover{ border-color:var(--purple); background:rgba(168,85,247,0.08); }
+  .nav-account.is-logged-in{ color:var(--violet-light); border-color:var(--purple); }
+ 
+  /* ---------- Auth modal ---------- */
+  .modal-overlay{
+    display:none; position:fixed; inset:0; background:rgba(6,4,10,0.72);
+    backdrop-filter:blur(3px); z-index:100; align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-overlay.open{ display:flex; }
+  .modal{
+    position:relative; width:100%; max-width:360px;
+    background:var(--bg-panel-2); border:1px solid var(--slot-border); border-radius:8px;
+    padding:32px 28px; box-shadow:0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(168,85,247,0.1);
+  }
+  .modal-close{
+    position:absolute; top:14px; right:14px; background:none; border:none;
+    color:var(--text-faint); font-size:1.3rem; line-height:1; cursor:pointer;
+  }
+  .modal-close:hover{ color:var(--text-primary); }
+  .modal-tabs{ display:flex; gap:4px; margin-bottom:24px; background:var(--slot); border-radius:6px; padding:4px; }
+  .modal-tab{
+    flex:1; background:none; border:none; color:var(--text-secondary); font-weight:700;
+    font-size:0.85rem; padding:9px 0; border-radius:5px; cursor:pointer; transition:all 0.15s ease;
+  }
+  .modal-tab.active{ background:var(--purple); color:#fff; }
+  .modal-form{ display:flex; flex-direction:column; gap:16px; }
+  .modal-form.hidden{ display:none; }
+  .modal-submit{ margin-top:4px; width:100%; }
+  .modal-error{ color:var(--pink); font-size:0.82rem; min-height:16px; }
+  .account-panel{
+    display:flex; align-items:center; gap:12px; justify-content:center;
+    color:var(--text-secondary); font-size:0.9rem;
+  }
+  .account-panel strong{ color:var(--violet-light); }
+  .account-logout{
+    background:none; border:1px solid var(--slot-border); color:var(--text-secondary);
+    padding:8px 14px; border-radius:var(--radius); font-size:0.82rem; font-weight:700; cursor:pointer;
+  }
+  .account-logout:hover{ border-color:var(--pink); color:var(--pink); }
+ 
   @media (max-width:720px){ .nav-links{display:none;} }
-
+ 
   /* ---------- Hero ---------- */
   .hero{
-    padding:96px 0 80px;
-    display:grid; grid-template-columns:1.15fr 1fr; gap:56px; align-items:center;
+    padding:88px 0 56px;
+    display:flex; flex-direction:column; align-items:center; text-align:center;
+    position:relative;
   }
+  .hero-glow{
+    position:absolute; top:-80px; left:50%; transform:translateX(-50%);
+    width:520px; height:420px;
+    background:radial-gradient(circle, rgba(168,85,247,0.28), transparent 70%);
+    filter:blur(10px); pointer-events:none; z-index:-1;
+  }
+  .hero-logo{ width:96px; height:96px; margin-bottom:28px; }
+  .hero-logo svg{ width:100%; height:100%; }
   .hero-eyebrow{
-    color:var(--emerald); font-weight:700; font-size:0.85rem;
-    margin-bottom:18px; display:flex; align-items:center; gap:10px;
+    color:var(--purple); font-weight:700; font-size:0.85rem;
+    margin-bottom:18px; display:flex; align-items:center; gap:10px; justify-content:center;
   }
-  .hero-eyebrow .dot{width:7px; height:7px; background:var(--emerald); display:inline-block;}
+  .hero-eyebrow .dot{width:7px; height:7px; background:var(--purple); display:inline-block; border-radius:50%; box-shadow:0 0 8px var(--purple);}
   .hero h1{
-    font-size:clamp(2.2rem, 4.4vw, 3.4rem);
-    line-height:1.08; font-weight:900;
-    margin-bottom:22px;
+    font-size:clamp(2.1rem, 4.6vw, 3.3rem);
+    line-height:1.14; font-weight:900;
+    margin-bottom:22px; max-width:18ch;
   }
   .hero p.lead{
-    color:var(--text-secondary); font-size:1.08rem; max-width:46ch; margin-bottom:32px;
+    color:var(--text-secondary); font-size:1.05rem; max-width:52ch; margin-bottom:34px;
   }
-  .hero-actions{display:flex; gap:14px; flex-wrap:wrap;}
+  .hero-actions{display:flex; gap:14px; flex-wrap:wrap; justify-content:center; margin-bottom:48px;}
   .btn-primary{
-    background:var(--emerald); color:#0D1512; font-weight:700; padding:14px 26px;
+    background:linear-gradient(90deg, var(--purple-dim), var(--purple)); color:#fff; font-weight:700; padding:14px 28px;
     border:none; border-radius:var(--radius); font-size:0.95rem;
-    box-shadow:4px 4px 0 var(--emerald-dim);
+    box-shadow:0 0 24px rgba(168,85,247,0.45);
     transition:transform 0.12s ease, box-shadow 0.12s ease;
   }
-  .btn-primary:hover{transform:translate(-2px,-2px); box-shadow:6px 6px 0 var(--emerald-dim);}
+  .btn-primary:hover{transform:translateY(-2px); box-shadow:0 0 32px rgba(168,85,247,0.65);}
   .btn-ghost{
-    background:transparent; color:var(--text-primary); font-weight:700; padding:14px 26px;
+    background:rgba(255,255,255,0.03); color:var(--text-primary); font-weight:700; padding:14px 26px;
     border:1px solid var(--slot-border); border-radius:var(--radius); font-size:0.95rem;
     transition:border-color 0.15s ease, background 0.15s ease;
   }
-  .btn-ghost:hover{border-color:var(--gold); background:rgba(217,164,65,0.06);}
-
+  .btn-ghost:hover{border-color:var(--purple); background:rgba(168,85,247,0.08);}
+ 
+  .hero-stats{
+    display:flex; gap:56px; flex-wrap:wrap; justify-content:center;
+    padding-top:36px; border-top:1px solid var(--slot-border); width:100%; max-width:520px;
+  }
+  .stat{ text-align:center; }
+  .stat-num{ font-family:'Unbounded'; font-weight:800; font-size:1.5rem; color:var(--violet-light); }
+  .stat-label{ font-size:0.78rem; color:var(--text-faint); margin-top:4px; }
+ 
   /* hero mosaic — like an inventory grid assembling */
+  #portfolio-preview{ padding:56px 0 76px; }
   .mosaic{
     display:grid; grid-template-columns:repeat(3, 1fr); grid-template-rows:repeat(3, 1fr);
-    gap:8px; aspect-ratio:1/1;
+    gap:8px; aspect-ratio:16/6; max-width:760px; margin:0 auto;
   }
   .slot{
     background:var(--slot); border:1px solid var(--slot-border);
@@ -131,8 +199,10 @@
     position:relative; overflow:hidden;
     opacity:0; transform:scale(0.85);
     animation:pop 0.4s ease forwards;
+    transition:border-color 0.15s ease;
   }
-  .slot svg{width:38%; height:38%; opacity:0.85;}
+  .slot:hover{ border-color:var(--purple); }
+  .slot svg{width:34%; height:34%; opacity:0.9;}
   .slot.big{grid-column:span 2; grid-row:span 2;}
   .slot:nth-child(1){animation-delay:0.05s;}
   .slot:nth-child(2){animation-delay:0.12s;}
@@ -140,35 +210,36 @@
   .slot:nth-child(4){animation-delay:0.26s;}
   .slot:nth-child(5){animation-delay:0.33s;}
   @keyframes pop{ to{opacity:1; transform:scale(1);} }
-
+ 
   @media (max-width:900px){
-    .hero{grid-template-columns:1fr; padding:56px 0 48px;}
-    .mosaic{max-width:340px; margin:0 auto;}
+    .hero{ padding:64px 0 40px; }
+    .mosaic{max-width:340px; aspect-ratio:1/1;}
+    .hero-stats{ gap:32px; }
   }
-
+ 
   /* ---------- Section shell ---------- */
   section{padding:76px 0;}
   .section-head{margin-bottom:44px; max-width:60ch;}
-  .section-head .kicker{color:var(--gold); font-weight:700; font-size:0.85rem; margin-bottom:10px;}
+  .section-head .kicker{color:var(--violet-light); font-weight:700; font-size:0.85rem; margin-bottom:10px;}
   .section-head h2{font-size:clamp(1.6rem, 3vw, 2.2rem); font-weight:800; margin-bottom:12px;}
   .section-head p{color:var(--text-secondary); font-size:1rem;}
-
+ 
   hr.divider{border:none; border-top:1px solid var(--slot-border); margin:0;}
-
+ 
   /* ---------- Services ---------- */
   .services-grid{
     display:grid; grid-template-columns:repeat(auto-fit, minmax(230px,1fr)); gap:2px;
     background:var(--slot-border); border:1px solid var(--slot-border);
   }
   .service-card{
-    background:var(--bg-panel); padding:30px 26px; position:relative;
-    transition:background 0.15s ease;
+    background:var(--bg-panel); backdrop-filter:blur(6px); padding:30px 26px; position:relative;
+    transition:background 0.15s ease, box-shadow 0.2s ease;
   }
-  .service-card:hover{background:var(--bg-panel-2);}
+  .service-card:hover{background:var(--bg-panel-2); box-shadow:inset 0 0 0 1px rgba(168,85,247,0.4), 0 0 24px rgba(168,85,247,0.12);}
   .service-card .icon{width:34px; height:34px; margin-bottom:18px;}
   .service-card h3{font-size:1.05rem; font-weight:700; margin-bottom:10px;}
   .service-card p{color:var(--text-secondary); font-size:0.92rem;}
-
+ 
   /* ---------- Portfolio ---------- */
   .gallery{
     display:grid; grid-template-columns:repeat(4, 1fr); grid-auto-rows:130px; gap:6px;
@@ -180,26 +251,26 @@
     font-size:0.78rem; color:var(--text-faint); font-weight:600;
     transition:border-color 0.15s ease;
   }
-  .g-item:hover{border-color:var(--emerald);}
+  .g-item:hover{border-color:var(--purple);}
   .g-item span.tag{color:var(--text-secondary);}
   .g-item.tall{grid-row:span 2;}
   .g-item.wide{grid-column:span 2;}
-
+ 
   @media (max-width:700px){
     .gallery{grid-template-columns:repeat(2,1fr);}
     .g-item.wide{grid-column:span 2;}
   }
-
+ 
   /* ---------- Pricing ---------- */
   .pricing-grid{
     display:grid; grid-template-columns:repeat(3, 1fr); gap:2px;
     background:var(--slot-border); border:1px solid var(--slot-border);
   }
   .price-card{
-    background:var(--bg-panel); padding:32px 28px; display:flex; flex-direction:column;
+    background:var(--bg-panel); backdrop-filter:blur(6px); padding:32px 28px; display:flex; flex-direction:column;
   }
-  .price-card.featured{background:var(--bg-panel-2); border-top:2px solid var(--emerald);}
-  .price-card .tier{font-weight:700; font-size:0.85rem; color:var(--gold); margin-bottom:8px;}
+  .price-card.featured{background:var(--bg-panel-2); border-top:2px solid var(--purple); box-shadow:0 0 30px rgba(168,85,247,0.15);}
+  .price-card .tier{font-weight:700; font-size:0.85rem; color:var(--violet-light); margin-bottom:8px;}
   .price-card h3{font-size:1.3rem; font-weight:800; margin-bottom:4px;}
   .price-card .amount{font-family:'Unbounded'; font-size:1.9rem; font-weight:900; margin:14px 0 6px;}
   .price-card .amount span{font-size:0.95rem; color:var(--text-secondary); font-weight:500; font-family:'Manrope';}
@@ -208,35 +279,35 @@
     color:var(--text-secondary); font-size:0.88rem; padding:7px 0 7px 20px; position:relative;
   }
   .price-card li::before{
-    content:''; position:absolute; left:0; top:14px; width:6px; height:6px; background:var(--emerald);
+    content:''; position:absolute; left:0; top:14px; width:6px; height:6px; background:var(--purple);
   }
   .price-card button{
     background:transparent; border:1px solid var(--slot-border); color:var(--text-primary);
     padding:12px; font-weight:700; font-size:0.88rem; border-radius:var(--radius);
     transition:all 0.15s ease;
   }
-  .price-card.featured button{background:var(--emerald); color:#0D1512; border-color:var(--emerald);}
-  .price-card button:hover{border-color:var(--gold);}
+  .price-card.featured button{background:linear-gradient(90deg, var(--purple-dim), var(--purple)); color:#fff; border-color:var(--purple); box-shadow:0 0 16px rgba(168,85,247,0.35);}
+  .price-card button:hover{border-color:var(--violet-light);}
   .price-card.featured button:hover{filter:brightness(1.08);}
-
+ 
   @media (max-width:800px){ .pricing-grid{grid-template-columns:1fr;} }
-
+ 
   /* ---------- Process ---------- */
   .process{display:grid; grid-template-columns:repeat(4,1fr); gap:2px; background:var(--slot-border); border:1px solid var(--slot-border);}
   .step{background:var(--bg-panel); padding:26px 22px;}
-  .step .num{font-family:'Unbounded'; color:var(--emerald); font-weight:800; font-size:1.1rem; margin-bottom:14px;}
+  .step .num{font-family:'Unbounded'; color:var(--purple); font-weight:800; font-size:1.1rem; margin-bottom:14px;}
   .step h4{font-size:0.98rem; font-weight:700; margin-bottom:8px;}
   .step p{color:var(--text-secondary); font-size:0.85rem;}
   @media (max-width:800px){ .process{grid-template-columns:1fr 1fr;} }
   @media (max-width:500px){ .process{grid-template-columns:1fr;} }
-
+ 
   /* ---------- Order form ---------- */
   .order-panel{
     background:var(--bg-panel); border:1px solid var(--slot-border); padding:44px;
     display:grid; grid-template-columns:1fr 1fr; gap:28px;
   }
   @media (max-width:800px){ .order-panel{grid-template-columns:1fr; padding:28px;} }
-
+ 
   .field{display:flex; flex-direction:column; gap:8px;}
   .field label{font-size:0.82rem; font-weight:700; color:var(--text-secondary);}
   .field input, .field select, .field textarea{
@@ -245,33 +316,35 @@
     transition:border-color 0.15s ease;
   }
   .field input:focus, .field select:focus, .field textarea:focus{
-    outline:none; border-color:var(--emerald);
+    outline:none; border-color:var(--purple);
   }
   .field textarea{resize:vertical; min-height:96px;}
   .field.full{grid-column:1/-1;}
-
+ 
   .order-submit{
     grid-column:1/-1; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;
     padding-top:6px;
   }
   .order-note{color:var(--text-faint); font-size:0.82rem; max-width:36ch;}
-
+ 
   #order-status{
     grid-column:1/-1; display:none; padding:16px 18px; background:rgba(53,179,120,0.1);
-    border:1px solid var(--emerald-dim); color:var(--emerald); font-size:0.9rem; font-weight:600;
+    border:1px solid var(--purple-dim); color:var(--purple); font-size:0.9rem; font-weight:600;
   }
-
+ 
   /* ---------- Footer ---------- */
   footer{border-top:1px solid var(--slot-border); padding:36px 0; margin-top:40px;}
   .foot-row{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;}
   .foot-row p{color:var(--text-faint); font-size:0.85rem;}
   .foot-links{display:flex; gap:22px;}
   .foot-links a{color:var(--text-secondary); font-size:0.85rem; transition:color 0.15s ease;}
-  .foot-links a:hover{color:var(--emerald);}
+  .foot-links a:hover{color:var(--purple);}
 </style>
 </head>
 <body>
-
+ 
+<canvas id="starfield"></canvas>
+ 
 <header>
   <div class="wrap nav">
     <div class="logo"><span class="logo-mark"></span>RICHVISUAL</div>
@@ -281,43 +354,118 @@
       <a href="#pricing">Цены</a>
       <a href="#process">Как заказать</a>
     </nav>
-    <a href="#order" class="nav-cta">Оставить заявку</a>
+    <div class="nav-right">
+      <button type="button" class="nav-account" id="btn-account">Войти</button>
+      <a href="#order" class="nav-cta">Оставить заявку</a>
+    </div>
   </div>
 </header>
-
-<div class="wrap">
-
-  <section class="hero">
-    <div>
-      <div class="hero-eyebrow"><span class="dot"></span>Визуал для Minecraft-каналов и серверов</div>
-      <h1>Обложки, баннеры и лого, которые заставляют кликнуть</h1>
-      <p class="lead">Делаю визуал для ютуберов, стримеров и серверов: превью для видео, шапки каналов, лого сборок и полные комплекты оформления. Быстро, по референсам, с правками.</p>
-      <div class="hero-actions">
-        <a href="#order" class="btn-primary">Оставить заявку</a>
-        <a href="#pricing" class="btn-ghost">Смотреть цены</a>
-      </div>
+ 
+<!-- ---------- Auth modal ---------- -->
+<div class="modal-overlay" id="auth-overlay">
+  <div class="modal">
+    <button type="button" class="modal-close" id="auth-close">×</button>
+    <div class="modal-tabs">
+      <button type="button" class="modal-tab active" data-tab="login">Вход</button>
+      <button type="button" class="modal-tab" data-tab="register">Регистрация</button>
     </div>
+ 
+    <form id="form-login" class="modal-form">
+      <div class="field">
+        <label for="login-username">Ник</label>
+        <input type="text" id="login-username" required autocomplete="username">
+      </div>
+      <div class="field">
+        <label for="login-password">Пароль</label>
+        <input type="password" id="login-password" required autocomplete="current-password">
+      </div>
+      <div class="modal-error" id="login-error"></div>
+      <button type="submit" class="btn-primary modal-submit">Войти</button>
+    </form>
+ 
+    <form id="form-register" class="modal-form hidden">
+      <div class="field">
+        <label for="reg-username">Ник</label>
+        <input type="text" id="reg-username" required autocomplete="username" placeholder="3–20 символов, латиница/цифры">
+      </div>
+      <div class="field">
+        <label for="reg-password">Пароль</label>
+        <input type="password" id="reg-password" required autocomplete="new-password" placeholder="Минимум 6 символов">
+      </div>
+      <div class="modal-error" id="register-error"></div>
+      <button type="submit" class="btn-primary modal-submit">Создать аккаунт</button>
+    </form>
+  </div>
+</div>
+ 
+<div class="wrap">
+ 
+  <section class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-logo">
+      <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="hgRing" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#C4B5FD"/><stop offset="55%" stop-color="#A855F7"/><stop offset="100%" stop-color="#6D28D9"/>
+          </linearGradient>
+          <filter id="hgGlow" x="-60%" y="-60%" width="220%" height="220%">
+            <feGaussianBlur stdDeviation="10" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <circle cx="256" cy="256" r="226" fill="none" stroke="url(#hgRing)" stroke-width="6" opacity="0.9"/>
+        <circle cx="256" cy="256" r="204" fill="none" stroke="#2C2735" stroke-width="1.5" opacity="0.8"/>
+        <g filter="url(#hgGlow)">
+          <line x1="256" y1="128" x2="256" y2="188" stroke="url(#hgRing)" stroke-width="8" stroke-linecap="round"/>
+          <line x1="256" y1="324" x2="256" y2="384" stroke="url(#hgRing)" stroke-width="8" stroke-linecap="round"/>
+          <line x1="128" y1="256" x2="188" y2="256" stroke="url(#hgRing)" stroke-width="8" stroke-linecap="round"/>
+          <line x1="324" y1="256" x2="384" y2="256" stroke="url(#hgRing)" stroke-width="8" stroke-linecap="round"/>
+          <circle cx="256" cy="256" r="46" fill="none" stroke="url(#hgRing)" stroke-width="7"/>
+          <path d="M256 198 L268 244 L256 256 L244 244 Z" fill="url(#hgRing)"/>
+          <path d="M256 314 L268 268 L256 256 L244 268 Z" fill="url(#hgRing)"/>
+          <path d="M198 256 L244 244 L256 256 L244 268 Z" fill="url(#hgRing)"/>
+          <path d="M314 256 L268 244 L256 256 L268 268 Z" fill="url(#hgRing)"/>
+        </g>
+      </svg>
+    </div>
+    <div class="hero-eyebrow"><span class="dot"></span>Визуал для Minecraft-каналов и серверов</div>
+    <h1>Обложки, баннеры и лого,<br>которые заставляют кликнуть</h1>
+    <p class="lead">Делаю визуал для ютуберов, стримеров и серверов: превью для видео, шапки каналов, лого сборок и полные комплекты оформления. Быстро, по референсам, с правками.</p>
+    <div class="hero-actions">
+      <a href="#order" class="btn-primary">Оставить заявку</a>
+      <a href="#pricing" class="btn-ghost">Смотреть цены</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">180+</div><div class="stat-label">готовых заказов</div></div>
+      <div class="stat"><div class="stat-num">4.9</div><div class="stat-label">средняя оценка</div></div>
+      <div class="stat"><div class="stat-num">24ч</div><div class="stat-label">срочный формат</div></div>
+    </div>
+  </section>
+ 
+  <hr class="divider">
+ 
+  <section id="portfolio-preview">
     <div class="mosaic">
       <div class="slot big">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#35B378" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="1"/><circle cx="8.5" cy="10" r="1.5" fill="#35B378" stroke="none"/><path d="M3 16l5-4 4 3 5-5 4 4"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#A855F7" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="1"/><circle cx="8.5" cy="10" r="1.5" fill="#A855F7" stroke="none"/><path d="M3 16l5-4 4 3 5-5 4 4"/></svg>
       </div>
       <div class="slot">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#D9A441" stroke-width="1.6"><rect x="4" y="4" width="16" height="16"/><path d="M4 4l16 16M20 4L4 20"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#C4B5FD" stroke-width="1.6"><rect x="4" y="4" width="16" height="16"/><path d="M4 4l16 16M20 4L4 20"/></svg>
       </div>
       <div class="slot">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#9AA6A0" stroke-width="1.6"><rect x="6" y="3" width="12" height="18" rx="1"/><path d="M9 7h6M9 11h6M9 15h3"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#B3A8D6" stroke-width="1.6"><rect x="6" y="3" width="12" height="18" rx="1"/><path d="M9 7h6M9 11h6M9 15h3"/></svg>
       </div>
       <div class="slot">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#35B378" stroke-width="1.6"><path d="M12 3l3 6 6 1-4.5 4.4L17.5 21 12 17.8 6.5 21l1-6.6L3 10l6-1z"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#A855F7" stroke-width="1.6"><path d="M12 3l3 6 6 1-4.5 4.4L17.5 21 12 17.8 6.5 21l1-6.6L3 10l6-1z"/></svg>
       </div>
       <div class="slot">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#C1483B" stroke-width="1.6"><rect x="3" y="8" width="18" height="10"/><rect x="3" y="4" width="18" height="4"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#E879F9" stroke-width="1.6"><rect x="3" y="8" width="18" height="10"/><rect x="3" y="4" width="18" height="4"/></svg>
       </div>
     </div>
   </section>
-
+ 
   <hr class="divider">
-
+ 
   <section id="services">
     <div class="section-head">
       <div class="kicker">Услуги</div>
@@ -326,30 +474,30 @@
     </div>
     <div class="services-grid">
       <div class="service-card">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#35B378" stroke-width="1.5"><rect x="3" y="5" width="18" height="14" rx="1"/><circle cx="8.5" cy="10" r="1.5"/><path d="M3 16l5-4 4 3 5-5 4 4"/></svg>
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#A855F7" stroke-width="1.5"><rect x="3" y="5" width="18" height="14" rx="1"/><circle cx="8.5" cy="10" r="1.5"/><path d="M3 16l5-4 4 3 5-5 4 4"/></svg>
         <h3>Превью для видео</h3>
         <p>Кликабельная обложка под конкретный ролик: акцент на лицо, предмет или момент, крупный читаемый текст.</p>
       </div>
       <div class="service-card">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#D9A441" stroke-width="1.5"><rect x="3" y="8" width="18" height="10"/><rect x="3" y="4" width="18" height="4"/></svg>
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#C4B5FD" stroke-width="1.5"><rect x="3" y="8" width="18" height="10"/><rect x="3" y="4" width="18" height="4"/></svg>
         <h3>Баннер канала</h3>
         <p>Шапка для YouTube, Telegram или Discord с сохранением безопасных зон под аватар и виджеты.</p>
       </div>
       <div class="service-card">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#C1483B" stroke-width="1.5"><path d="M12 3l3 6 6 1-4.5 4.4L17.5 21 12 17.8 6.5 21l1-6.6L3 10l6-1z"/></svg>
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#E879F9" stroke-width="1.5"><path d="M12 3l3 6 6 1-4.5 4.4L17.5 21 12 17.8 6.5 21l1-6.6L3 10l6-1z"/></svg>
         <h3>Логотип сборки</h3>
         <p>Знак для модпака, сборки или сервера: иконка, читаемая даже в размере 32×32.</p>
       </div>
       <div class="service-card">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#9AA6A0" stroke-width="1.5"><rect x="4" y="4" width="7" height="7"/><rect x="13" y="4" width="7" height="7"/><rect x="4" y="13" width="7" height="7"/><rect x="13" y="13" width="7" height="7"/></svg>
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#B3A8D6" stroke-width="1.5"><rect x="4" y="4" width="7" height="7"/><rect x="13" y="4" width="7" height="7"/><rect x="4" y="13" width="7" height="7"/><rect x="13" y="13" width="7" height="7"/></svg>
         <h3>Полный комплект</h3>
         <p>Превью, баннер, лого и аватар в единой стилистике — чтобы канал считывался как одно целое.</p>
       </div>
     </div>
   </section>
-
+ 
   <hr class="divider">
-
+ 
   <section id="portfolio">
     <div class="section-head">
       <div class="kicker">Портфолио</div>
@@ -365,56 +513,54 @@
       <div class="g-item"><span class="tag">Баннер</span> Discord «Рудники»</div>
     </div>
   </section>
-
+ 
   <hr class="divider">
-
+ 
   <section id="pricing">
     <div class="section-head">
       <div class="kicker">Цены</div>
       <h2>Прозрачные тарифы без скрытых доплат</h2>
-      <p>Правки в пределах тарифа включены. Срочность (до 24 часов) — плюс 30% к стоимости.</p>
+      <p>Разовая оплата за выбранный срок, без автопродления и скрытых списаний.</p>
     </div>
     <div class="pricing-grid">
       <div class="price-card">
-        <div class="tier">Старт</div>
-        <h3>Одно превью</h3>
-        <div class="amount">700 ₽</div>
+        <div class="tier">Базовый</div>
+        <h3>1 месяц</h3>
+        <div class="amount">100 ₽</div>
         <ul>
-          <li>1 превью в разрешении 1280×720</li>
-          <li>2 круга правок</li>
-          <li>Срок — 2 дня</li>
+          <li>Полный доступ на 30 дней</li>
+          <li>Все текущие обновления</li>
+          <li>Поддержка в Discord</li>
         </ul>
         <button type="button">Выбрать тариф</button>
       </div>
       <div class="price-card featured">
         <div class="tier">Популярный</div>
-        <h3>Оформление канала</h3>
-        <div class="amount">2 400 ₽ <span>/ 5 превью</span></div>
+        <h3>3 месяца</h3>
+        <div class="amount">350 ₽</div>
         <ul>
-          <li>5 превью в едином стиле</li>
-          <li>Баннер канала</li>
-          <li>3 круга правок</li>
-          <li>Срок — 4 дня</li>
+          <li>Полный доступ на 90 дней</li>
+          <li>Все текущие и будущие обновления</li>
+          <li>Приоритетная поддержка в Discord</li>
         </ul>
         <button type="button">Выбрать тариф</button>
       </div>
       <div class="price-card">
-        <div class="tier">Полный</div>
-        <h3>Комплект + лого</h3>
-        <div class="amount">4 200 ₽</div>
+        <div class="tier">Навсегда</div>
+        <h3>Пожизненно</h3>
+        <div class="amount">450 ₽</div>
         <ul>
-          <li>Превью, баннер, лого, аватар</li>
-          <li>Гайд по использованию цветов и шрифтов</li>
-          <li>Безлимит правок 7 дней</li>
-          <li>Срок — 6 дней</li>
+          <li>Доступ без ограничения по сроку</li>
+          <li>Все обновления включены навсегда</li>
+          <li>Приоритетная поддержка в Discord</li>
         </ul>
         <button type="button">Выбрать тариф</button>
       </div>
     </div>
   </section>
-
+ 
   <hr class="divider">
-
+ 
   <section id="process">
     <div class="section-head">
       <div class="kicker">Как заказать</div>
@@ -443,16 +589,16 @@
       </div>
     </div>
   </section>
-
+ 
   <hr class="divider">
-
+ 
   <section id="order">
     <div class="section-head">
       <div class="kicker">Заявка</div>
       <h2>Расскажите о задаче</h2>
       <p>Отвечаю на заявки в течение суток. Чем подробнее опишете идею, тем точнее будет первый черновик.</p>
     </div>
-
+ 
     <form class="order-panel" id="order-form">
       <div class="field">
         <label for="name">Имя или никнейм</label>
@@ -490,9 +636,9 @@
       <div id="order-status">Заявка сохранена. Свяжусь с вами по указанному контакту в течение суток.</div>
     </form>
   </section>
-
+ 
 </div>
-
+ 
 <footer>
   <div class="wrap foot-row">
     <p>© 2026 RichVisual. Не связано с Mojang или Microsoft.</p>
@@ -503,7 +649,157 @@
     </div>
   </div>
 </footer>
-
+ 
+<script>
+  // ---------- Auth modal ----------
+  const overlay = document.getElementById('auth-overlay');
+  const btnAccount = document.getElementById('btn-account');
+  const btnClose = document.getElementById('auth-close');
+  const tabs = document.querySelectorAll('.modal-tab');
+  const formLogin = document.getElementById('form-login');
+  const formRegister = document.getElementById('form-register');
+  const loginError = document.getElementById('login-error');
+  const registerError = document.getElementById('register-error');
+ 
+  let currentUser = null;
+ 
+  function openModal(tab){
+    overlay.classList.add('open');
+    setTab(tab || 'login');
+  }
+  function closeModal(){
+    overlay.classList.remove('open');
+    loginError.textContent = '';
+    registerError.textContent = '';
+  }
+  function setTab(tab){
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+    formLogin.classList.toggle('hidden', tab !== 'login');
+    formRegister.classList.toggle('hidden', tab !== 'register');
+  }
+ 
+  tabs.forEach(t => t.addEventListener('click', () => setTab(t.dataset.tab)));
+  btnClose.addEventListener('click', closeModal);
+  overlay.addEventListener('click', (e) => { if(e.target === overlay) closeModal(); });
+ 
+  function renderAccountButton(){
+    if(currentUser){
+      btnAccount.textContent = currentUser;
+      btnAccount.classList.add('is-logged-in');
+      btnAccount.onclick = async () => {
+        await fetch('/api/logout', { method: 'POST' });
+        currentUser = null;
+        renderAccountButton();
+      };
+    } else {
+      btnAccount.textContent = 'Войти';
+      btnAccount.classList.remove('is-logged-in');
+      btnAccount.onclick = () => openModal('login');
+    }
+  }
+ 
+  async function checkSession(){
+    try{
+      const res = await fetch('/api/me');
+      if(res.ok){
+        const data = await res.json();
+        currentUser = data.username;
+      }
+    } catch {}
+    renderAccountButton();
+  }
+ 
+  formLogin.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    loginError.textContent = '';
+    const username = document.getElementById('login-username').value.trim();
+    const password = document.getElementById('login-password').value;
+    try{
+      const res = await fetch('/api/login', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+      if(!res.ok){ loginError.textContent = data.error || 'Ошибка входа'; return; }
+      currentUser = data.username;
+      renderAccountButton();
+      closeModal();
+    } catch { loginError.textContent = 'Не удалось связаться с сервером'; }
+  });
+ 
+  formRegister.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    registerError.textContent = '';
+    const username = document.getElementById('reg-username').value.trim();
+    const password = document.getElementById('reg-password').value;
+    try{
+      const res = await fetch('/api/register', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+      if(!res.ok){ registerError.textContent = data.error || 'Ошибка регистрации'; return; }
+      currentUser = data.username;
+      renderAccountButton();
+      closeModal();
+    } catch { registerError.textContent = 'Не удалось связаться с сервером'; }
+  });
+ 
+  checkSession();
+</script>
+ 
+<script>
+  // ---------- Starfield ----------
+  const canvas = document.getElementById('starfield');
+  const ctx = canvas.getContext('2d');
+  let w, h, stars;
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ 
+  function resize(){
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+ 
+  function makeStars(count){
+    const arr = [];
+    for(let i = 0; i < count; i++){
+      arr.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        z: Math.random() * 1 + 0.2,       // depth: controls size + speed
+        r: Math.random() * 1.4 + 0.3,
+        tw: Math.random() * Math.PI * 2   // twinkle phase
+      });
+    }
+    return arr;
+  }
+ 
+  function init(){
+    resize();
+    stars = makeStars(Math.floor((w * h) / 6000));
+  }
+ 
+  function drawFrame(time){
+    ctx.clearRect(0, 0, w, h);
+    for(const s of stars){
+      if(!prefersReducedMotion){
+        s.y += s.z * 0.28;
+        if(s.y > h){ s.y = 0; s.x = Math.random() * w; }
+      }
+      const twinkle = 0.55 + 0.45 * Math.sin(time * 0.0015 + s.tw);
+      ctx.beginPath();
+      ctx.fillStyle = `rgba(230, 216, 255, ${0.5 * twinkle * s.z + 0.15})`;
+      ctx.arc(s.x, s.y, s.r * s.z, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    requestAnimationFrame(drawFrame);
+  }
+ 
+  init();
+  window.addEventListener('resize', init);
+  requestAnimationFrame(drawFrame);
+</script>
+ 
 <script>
   document.getElementById('order-form').addEventListener('submit', function(e){
     e.preventDefault();
@@ -513,6 +809,7 @@
     status.scrollIntoView({behavior:'smooth', block:'nearest'});
   });
 </script>
-
+ 
 </body>
 </html>
+ 
